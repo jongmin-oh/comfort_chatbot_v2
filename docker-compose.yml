@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/opt/comfort_chatbot_v2/data
+      - ./models:/opt/comfort_chatbot_v2/models

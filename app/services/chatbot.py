@@ -43,20 +43,20 @@ class ComfortBot:
         D, I = self.faiss_index.search(query_embedding, top_k)
         return I[0], D[0]
     
-    def reply(self, query: str) -> str:
+    def reply(self, query: str, threshold: float = 0.75) -> str:
         query_embedding = self.embedding_query(query, normalize_embeddings=True)
         query_embedding = query_embedding.reshape(1, -1)
         I, D = self.semantic_search(query_embedding)
         
         result = pd.DataFrame({"query": self.df.loc[I]['user'] ,"answers": self.df.loc[I]['system'], "distance": D})
-        result = result[result['distance'] > 0.75]
+        result = result[result['distance'] > threshold]
         
         if result.empty:
             return ping_pong_reply(query)
         
         pick_idx = top_k_sampling(result['distance'].tolist(), weight=3)
         response = result.iloc[pick_idx]['answers']
-        response = response.replace("00", "선생")
+        response = response.replace("00님", "선생님")
         return response
 
 if __name__ == "__main__":

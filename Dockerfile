@@ -21,9 +21,6 @@ COPY . /opt/comfort_chatbot
 #작업 폴더 설정
 WORKDIR /opt/comfort_chatbot
 
-# pip update
-RUN pip install --upgrade pip
-
 #PyTorch 설치
 RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 

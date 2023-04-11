@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import logging
 from app.services.chatbot import ComfortBot
 from app.services.kakao_api import skillTemplate
+from typing import Dict
 
 router = APIRouter(
     prefix="/chatbot",
@@ -20,20 +21,24 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class ComfortBotRequest(BaseModel):
+class ComfortBotTestRequest(BaseModel):
     query: str
+    
+class ComfortbotRequest(BaseModel):
+    userRequest: Dict
 
 comfort_bot = ComfortBot()
 
 @router.post("/comfort")
-async def comfort(request: ComfortBotRequest):
+async def comfort(request: ComfortBotTestRequest):
     answer = comfort_bot.reply(request.query)
     return {"A": answer}
 
 @router.post("/kakao")
-async def chatbotAPI(request: ComfortBotRequest):
+async def chatbotAPI(request: ComfortbotRequest):
     try:
-        result = comfort_bot.reply(request.query)
+        query = request.userRequest['utterance']
+        result = comfort_bot.reply(query)
         return skillTemplate.send_response(result)
 
     except Exception as e:

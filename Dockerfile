@@ -13,13 +13,13 @@ RUN apt-get update
 RUN apt-get install -y curl git g++
 
 # 디렉터리 생성
-RUN mkdir /opt/comfort_chatbot_v2
+RUN mkdir /opt/comfort_chatbot
 
 # 소스코드 복사
-COPY . /opt/comfort_chatbot_v2
+COPY . /opt/comfort_chatbot
 
 #작업 폴더 설정
-WORKDIR /opt/comfort_chatbot_v2
+WORKDIR /opt/comfort_chatbot
 
 # pip update
 RUN pip install --upgrade pip

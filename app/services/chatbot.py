@@ -1,5 +1,5 @@
 from app.config import paths
-from app.utility.utils import mean_pooling
+from app.utility.utils import mean_pooling, top_k_sampling
 from app.services.pingpong_api import ping_pong_reply
 
 import faiss
@@ -54,7 +54,10 @@ class ComfortBot:
         if result.empty:
             return ping_pong_reply(query)
         
-        return result.iloc[0]['answers']
+        pick_idx = top_k_sampling(result['distance'].tolist(), weight=3)
+        response = result.iloc[pick_idx]['answers']
+        response = response.replace("00", "선생")
+        return response
 
 if __name__ == "__main__":
     bot = ComfortBot()

@@ -19,7 +19,7 @@ class ComfortBot:
         self.sess = InferenceSession(str(self.onnx_path),
                             providers=["CPUExecutionProvider"])
         
-        self.df = pd.read_excel(paths.DATA_DIR.joinpath("base_datasets.xlsx")) 
+        self.df = pd.read_excel(paths.DATA_DIR.joinpath("base_datasets.xlsx"))
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         

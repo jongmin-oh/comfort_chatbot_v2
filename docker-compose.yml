@@ -5,8 +5,21 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
     ports:
       - "8000:8000"
     volumes:
       - ./data:/opt/comfort_chatbot/data
       - ./models:/opt/comfort_chatbot/models
+
+  db:
+    images: postgres:latest
+    container_name: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "221018"
+    volumes:
+      - ./postgresql/data/:/var/lib/postgresql/data

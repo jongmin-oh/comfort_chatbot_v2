@@ -22,7 +22,7 @@ app.include_router(bots.router)
 def on_app_start():
     print("---- server start -----")
     postgres.connect()
-    postgres.create_table()
+    create_reply_log_table(postgres.engine)
     
 @app.on_event("shutdown")
 def on_app_shutdown():

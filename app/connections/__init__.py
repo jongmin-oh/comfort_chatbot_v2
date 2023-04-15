@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.services.db.create_table import create_reply_log_table
@@ -20,9 +20,6 @@ class PostgresClient:
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
         print("---- postgres connected ----")
-        
-    def create_table(self):
-        create_reply_log_table(self.engine)
         
     def close(self):
         self.engine.dispose()

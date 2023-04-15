@@ -1,14 +1,15 @@
+from typing import List, Tuple
+import numpy as np
+import pandas as pd
+
 from app.config import paths
 from app.utility.utils import mean_pooling, top_k_sampling
 from app.services.pingpong_api import ping_pong_reply
+from app.services.db.save_log import save_reply_log
 
 import faiss
 from onnxruntime import InferenceSession
 from transformers import AutoTokenizer
-
-import numpy as np
-
-import pandas as pd
 
 class ComfortBot:
     def __init__(self):
@@ -38,7 +39,7 @@ class ComfortBot:
 
         return query_embedding.numpy()
     
-    def semantic_search(self, query_embedding: np.ndarray, top_k: int = 5) -> list:
+    def semantic_search(self, query_embedding: np.ndarray, top_k: int = 5) -> Tuple[List, List]:
         # query embedding to semantic search
         D, I = self.faiss_index.search(query_embedding, top_k)
         return I[0], D[0]
@@ -51,12 +52,16 @@ class ComfortBot:
         result = pd.DataFrame({"query": self.df.loc[I]['user'] ,"answers": self.df.loc[I]['system'], "distance": D})
         result = result[result['distance'] > threshold]
         
-        if result.empty:
-            return ping_pong_reply(query)
+        if result.empty: # ping-pong
+            response = ping_pong_reply(query)
+            save_reply_log(query, response, "2")
+            return response
         
         pick_idx = top_k_sampling(result['distance'].tolist(), weight=3)
         response = result.iloc[pick_idx]['answers']
         response = response.replace("00님", "선생님")
+        save_reply_log(query, response, "1")
+        
         return response
 
 if __name__ == "__main__":

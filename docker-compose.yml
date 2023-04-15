@@ -2,6 +2,7 @@ version: '3.9'
 
 services:
   app:
+    container_name: main
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,15 +12,18 @@ services:
     volumes:
       - ./data:/opt/comfort_chatbot/data
       - ./models:/opt/comfort_chatbot/models
+    depends_on:
+      - db
 
   db:
-    images: postgres:latest
+    image: postgres:latest
     container_name: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "221018"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_NAME}"
     volumes:
-      - ./postgresql/data/:/var/lib/postgresql/data
+      - ./postgres/data/:/var/lib/postgresql/data

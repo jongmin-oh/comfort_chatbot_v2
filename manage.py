@@ -4,7 +4,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import bots
 from app.config import settings
-from app.services.db.create_table import create_reply_log_table
 from app.connections import postgres
 
 app = FastAPI()
@@ -22,7 +21,8 @@ app.include_router(bots.router)
 def on_app_start():
     print("---- server start -----")
     postgres.connect()
-    create_reply_log_table(postgres.engine)
+    postgres.prepare()
+    
     
 @app.on_event("shutdown")
 def on_app_shutdown():

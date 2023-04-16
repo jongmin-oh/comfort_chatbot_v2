@@ -2,10 +2,13 @@ from typing import List, Tuple
 import numpy as np
 import pandas as pd
 
+from sqlalchemy import select
 from app.config import paths
 from app.utility.utils import mean_pooling, top_k_sampling
 from app.services.pingpong_api import ping_pong_reply
-from app.services.db.save_log import save_reply_log
+from app.db.save import save_reply_log
+from app.db.models import Answer
+from app.connections import postgres
 
 import faiss
 from onnxruntime import InferenceSession
@@ -19,8 +22,6 @@ class ComfortBot:
         self.faiss_index = faiss.read_index(str(self.faiss_path))
         self.sess = InferenceSession(str(self.onnx_path),
                             providers=["CPUExecutionProvider"])
-        
-        self.df = pd.read_excel(paths.DATA_DIR.joinpath("base_datasets.xlsx"))
         
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
         
@@ -42,27 +43,44 @@ class ComfortBot:
     def semantic_search(self, query_embedding: np.ndarray, top_k: int = 5) -> Tuple[List, List]:
         # query embedding to semantic search
         D, I = self.faiss_index.search(query_embedding, top_k)
-        return I[0], D[0]
+        
+        # sort for db fetch
+        _sorted = sorted(zip(I[0].tolist() , D[0].tolist()), key=lambda x: x[0])
+        I = [x[0] for x in _sorted]
+        D = [x[1] for x in _sorted]
+        
+        return I, D
+    
+    def db_fetch(self, index: List[int]) -> Tuple[str, str]:
+        index = [i+1 for i in index]
+        with postgres.engine.connect() as conn:
+            table = Answer.__table__
+            query = select(table.c.user, table.c.system).where(table.c.id.in_(index))
+            res = conn.execute(query)
+            return res.fetchall()
     
     def reply(self, query: str, threshold: float = 0.75) -> str:
         query_embedding = self.embedding_query(query, normalize_embeddings=True)
         query_embedding = query_embedding.reshape(1, -1)
         I, D = self.semantic_search(query_embedding)
         
-        result = pd.DataFrame({"query": self.df.loc[I]['user'] ,"answers": self.df.loc[I]['system'], "distance": D})
+        fetchd: Tuple = self.db_fetch(I)
+        user, system = zip(*fetchd)
+        
+        result = pd.DataFrame({"question": user ,"answers": system, "distance": D})
         result = result[result['distance'] > threshold]
         
         if result.empty: # ping-pong
             response = ping_pong_reply(query)
             save_reply_log(query, response, "2")
             return response
-        
-        pick_idx = top_k_sampling(result['distance'].tolist(), weight=3)
-        response = result.iloc[pick_idx]['answers']
-        response = response.replace("00님", "선생님")
-        save_reply_log(query, response, "1")
-        
-        return response
+        else: # semantic search
+            pick_idx = top_k_sampling(result['distance'].tolist(), weight=3)
+            response = result.iloc[pick_idx]['answers']
+            # response = result.iloc[pick_idx]['system']
+            response = response.replace("00님", "선생님")
+            save_reply_log(query, response, "1")
+            return response
 
 if __name__ == "__main__":
     bot = ComfortBot()

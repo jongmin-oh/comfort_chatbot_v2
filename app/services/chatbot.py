@@ -62,7 +62,7 @@ class ComfortBot:
     def reply(self, query: str, threshold: float = 0.75) -> str:
         
         cleaned = clean(query)
-        if cleaned == "":
+        if cleaned == "" or len(cleaned) > 128:
             return "무슨 뜻이에요? 이해 못한게 아니라 진짜 궁금해서 물어보는 거예요."
         
         query_embedding = self.embedding_query(query, normalize_embeddings=True)

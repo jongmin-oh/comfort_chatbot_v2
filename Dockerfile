@@ -24,6 +24,9 @@ WORKDIR /opt/comfort_chatbot
 #PyTorch 설치
 RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
 
+# pip update
+RUN pip install --upgrade pip
+
 # 파이썬 패키지 설치
 RUN pip install -r requirements.txt
 

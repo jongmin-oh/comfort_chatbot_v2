@@ -1,7 +1,20 @@
 import torch
 import random
 import numpy as np
+import re
+
 from typing import List
+
+
+def clean(text: str):
+    jamo_patterns = "([ㄱ-ㅎㅏ-ㅣ]+)"  # 한글 단일 자음&모음제거
+    special_patterns = "[-=+,#/\:$. @*\"※&%ㆍ』\\‘|\(\)\[\]\<\>`'…》.!?]" # 공백 특수문자 제거
+    text = re.sub(pattern=jamo_patterns, repl="", string=text)
+    text = re.sub(pattern=special_patterns, repl="", string=text)
+    text = re.sub(r"[0-9]+", "", string=text)
+    text = text.replace('~','')
+    text = text.strip()
+    return text
 
 def mean_pooling(model_output, attention_mask):
     model_output = torch.from_numpy(model_output[0])

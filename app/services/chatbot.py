@@ -4,7 +4,7 @@ import pandas as pd
 
 from sqlalchemy import select
 from app.config import paths
-from app.utility.utils import mean_pooling, top_k_sampling
+from app.utility.utils import mean_pooling, top_k_sampling, clean
 from app.services.pingpong_api import ping_pong_reply
 from app.db.save import save_reply_log
 from app.db.models import Answer
@@ -60,6 +60,11 @@ class ComfortBot:
             return res.fetchall()
     
     def reply(self, query: str, threshold: float = 0.75) -> str:
+        
+        cleaned = clean(query)
+        if cleaned == "":
+            return "무슨 뜻이에요? 이해 못한게 아니라 진짜 궁금해서 물어보는 거예요."
+        
         query_embedding = self.embedding_query(query, normalize_embeddings=True)
         query_embedding = query_embedding.reshape(1, -1)
         I, D = self.semantic_search(query_embedding)

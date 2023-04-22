@@ -62,9 +62,9 @@ class ComfortBot:
     def reply(self, query: str, threshold: float = 0.75) -> str:
         
         cleaned = clean(query)
-        if cleaned == "" or len(cleaned) > 128:
-            return "무슨 뜻이에요? 이해 못한게 아니라 진짜 궁금해서 물어보는 거예요."
-        
+        if cleaned == "":
+            return "무슨 말이에요? 😑 (1도 모르겠다는 표정을 지어본다)"
+            
         query_embedding = self.embedding_query(query, normalize_embeddings=True)
         query_embedding = query_embedding.reshape(1, -1)
         I, D = self.semantic_search(query_embedding)

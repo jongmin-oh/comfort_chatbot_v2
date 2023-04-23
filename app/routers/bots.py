@@ -21,23 +21,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 class ComfortBotTestRequest(BaseModel):
     query: str
-    
+
+
 class ComfortbotRequest(BaseModel):
     userRequest: Dict
 
+
 comfort_bot = ComfortBot()
+
 
 @router.post("/comfort")
 async def comfort(request: ComfortBotTestRequest):
     answer = comfort_bot.reply(request.query)
     return {"A": answer}
 
+
 @router.post("/kakao")
 async def chatbotAPI(request: ComfortbotRequest):
     try:
-        query = request.userRequest['utterance']
+        query = request.userRequest["utterance"]
         result = comfort_bot.reply(query)
         return skillTemplate.send_response(result)
 

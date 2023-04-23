@@ -17,18 +17,26 @@ app.add_middleware(
 
 app.include_router(bots.router)
 
+
 @app.on_event("startup")
 def on_app_start():
     print("---- server start -----")
     postgres.connect()
     postgres.prepare()
-    
-    
+
+
 @app.on_event("shutdown")
 def on_app_shutdown():
     postgres.close()
     print("---- server shutdown -----")
 
+
 if __name__ == "__main__":
-    uvicorn.run("manage:app", host=settings.HOST, port=settings.PORT,
-                log_level=settings.LOG_LEVEL, use_colors=True, reload=True)
+    uvicorn.run(
+        "manage:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        log_level=settings.LOG_LEVEL,
+        use_colors=True,
+        reload=True,
+    )

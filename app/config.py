@@ -11,6 +11,7 @@ class MainPath(BaseModel):
     FAISS_DIR: Path = BASE_DIR.joinpath("models", "faiss")
     MODEL_DIR: Path = BASE_DIR.joinpath("models", "onnx_models")
     LOGS_DIR: Path = BASE_DIR.joinpath("logs")
+    PROMPT_DIR: Path = BASE_DIR.joinpath("data", "prompts")
 
 
 class MainConfig(BaseSettings):
@@ -37,6 +38,25 @@ class PingPongConfig(BaseSettings):
         env_file: str = ".env"
 
 
-pingpong = PingPongConfig()
+class OpenAiConfig(BaseSettings):
+    OPENAI_API_KEY: Optional[str] = None
+
+    class Config:
+        env_file: str = ".env"
+
+
+class ClovaConfig(BaseSettings):
+    CLOVA_HOST: Optional[str] = None
+    CLOVA_API_KEY: Optional[str] = None
+    CLOVA_API_PRIVATE_KEY: Optional[str] = None
+    CLOVA_REQUEST_ID: Optional[str] = None
+
+    class Config:
+        env_file: str = ".env"
+
+
+pingpong_settings = PingPongConfig()
 paths = MainPath()
 settings = MainConfig()
+openai_settings = OpenAiConfig()
+clova_settings = ClovaConfig()

@@ -1,5 +1,5 @@
 from sqlalchemy import inspect
-from app.db.models import Answer, ReplyLog  # , metadata
+from app.db.models import Answer, ReplyLog
 
 
 def is_exist_table(engine, table_name) -> bool:

@@ -4,7 +4,7 @@ from app.db.models import ReplyLog
 
 def save_reply_log(question, answer, bot_type):
     try:
-        reply_log = ReplyLog(question=question, answer=answer, bot_type=bot_type)
+        reply_log = ReplyLog(question, answer, bot_type)
         postgres.session.add(reply_log)
         postgres.session.commit()
     except Exception as e:

@@ -19,8 +19,8 @@ class PostgresClient:
 
     def connect(self):
         self.engine = create_engine(f"postgresql://{USER}:{PW}@{HOST}:{PORT}/{DB}")
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        session = sessionmaker(bind=self.engine)
+        self.session = session()
         print("---- postgres connected ----")
 
     def prepare(self):

@@ -2,7 +2,6 @@ import pytest
 
 from httpx import AsyncClient
 
-# host = "http://13.124.208.65:8000/"
 host = "http://localhost:8100/"
 
 

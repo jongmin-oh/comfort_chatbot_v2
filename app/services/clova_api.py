@@ -57,7 +57,6 @@ class CompletionExecutor:
         response_text = self._execute(request_data)
         answer = response_text.split("\n오복이:")[-1]
         answer = answer.replace("당신", "선생님")
-        answer = answer.replace("너", "선생님")
         answer = answer.replace("내가", "제가")
         answer = answer.replace("내담자님", "선생님")
         return answer.strip()

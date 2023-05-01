@@ -1,5 +1,6 @@
 from typing import Dict
 import logging
+import json
 
 from fastapi import APIRouter
 
@@ -9,6 +10,7 @@ from app.services.kakao_api import skillTemplate
 from app.services.pingpong_api import ping_pong_reply
 from app.services.chatgpt_api import chatgpt_reply
 from app.services.clova_api import clova
+
 
 router = APIRouter(
     prefix="/chatbot",
@@ -46,8 +48,13 @@ async def comfort(request: ComfortBotTestRequest):
 @router.post("/kakao")
 async def kakao(request: ComfortbotRequest):
     try:
+        requset_dict = request.userRequest
+
+        with open("./log_dict.json", "w", encoding="utf-8") as f:
+            json.dump(requset_dict, f, indent=4, ensure_ascii=False)
+
         query = request.userRequest["utterance"]
-        result = chatgpt_reply(query)
+        result = clova.reply(query)
         return skillTemplate.send_response(result)
 
     except Exception as e:

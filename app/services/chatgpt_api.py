@@ -11,12 +11,13 @@ def chatgpt_reply(user_message: str) -> str:
 
     messages.append({"role": "user", "content": f"{user_message}"})
 
-    completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=messages)
     answer = completion.choices[0].message["content"].strip()
     answer = answer.replace("\n", " ")
     answer = answer.replace("당신", "선생님")
-    answer = answer.replace("너", "선생님")
     answer = answer.replace("내가", "제가")
+    answer = answer.replace("내담자", "선생님")
     answer = answer.replace("내담자님", "선생님")
     return answer
 

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Final
 import numpy as np
 import pandas as pd
 
@@ -6,17 +6,20 @@ from sqlalchemy import select
 from app.config import paths
 from app.utility.utils import mean_pooling, top_k_sampling, clean
 from app.services.pingpong_api import ping_pong_reply
+from app.services.clova_api import CompletionExecutor
 from app.db.save import save_reply_log
 from app.db.models import Answer
 from app.connections import postgres
+from app.services import Singleton
 
 import faiss
 from onnxruntime import InferenceSession
 from transformers import AutoTokenizer
 
 
-class ComfortBot:
+class ComfortBot(metaclass=Singleton):
     def __init__(self):
+        super().__init__()
         self.base_model = "snunlp/KR-SBERT-V40K-klueNLI-augSTS"
         self.faiss_path = paths.FAISS_DIR.joinpath("faiss_onnx_uint8.index")
         self.onnx_path = paths.MODEL_DIR.joinpath("sbert-model_uint8.onnx")
@@ -26,6 +29,8 @@ class ComfortBot:
         )
 
         self.tokenizer = AutoTokenizer.from_pretrained(self.base_model)
+        self.clova = CompletionExecutor()
+        self._THREADHOLD: Final[int] = 0.8
 
     def embedding_query(self, query: str, normalize_embeddings=False) -> np.ndarray:
         # user turn sequence to query embedding
@@ -60,10 +65,10 @@ class ComfortBot:
             res = conn.execute(query)
             return res.fetchall()
 
-    def reply(self, query: str, threshold: float = 0.75) -> str:
+    def reply(self, query: str) -> str:
         cleaned = clean(query)
         if cleaned == "":
-            return "무슨 말이에요? 😑 (1도 모르겠다는 표정을 지어본다)"
+            return "헤헤..."
 
         query_embedding = self.embedding_query(query, normalize_embeddings=True)
         query_embedding = query_embedding.reshape(1, -1)
@@ -73,12 +78,17 @@ class ComfortBot:
         user, system = zip(*fetchd)
 
         result = pd.DataFrame({"question": user, "answers": system, "distance": D})
-        result = result[result["distance"] > threshold]
+        result = result[result["distance"] > self._THREADHOLD]
 
         if result.empty:  # ping-pong
-            response = ping_pong_reply(query)
-            save_reply_log(query, response, "2")
-            return response
+            if len(cleaned) < 8:
+                response = ping_pong_reply(query)
+                save_reply_log(query, response, "2")
+                return response
+            else:  # clova
+                response = self.clova.reply(query)
+                save_reply_log(query, response, "3")
+                return response
         else:  # semantic search
             pick_idx = top_k_sampling(result["distance"].tolist(), weight=3)
             response = result.iloc[pick_idx]["answers"]

@@ -8,9 +8,11 @@ from typing import List
 
 def clean(text: str):
     jamo_patterns = "([ㄱ-ㅎㅏ-ㅣ]+)"  # 한글 단일 자음&모음제거
+    english_patterns = "[^가-힣ㄱ-ㅎㅏ-ㅣ\\s]"
     special_patterns = "[-=+,#/\:$. @*\"※&%ㆍ』\\‘|\(\)\[\]\<\>`'…》.!?]"  # 공백 특수문자 제거
     text = re.sub(pattern=jamo_patterns, repl="", string=text)
     text = re.sub(pattern=special_patterns, repl="", string=text)
+    text = re.sub(pattern=english_patterns, repl="", string=text)
     text = re.sub(r"[0-9]+", "", string=text)
     text = text.replace("~", "")
     text = text.strip()

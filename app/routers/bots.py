@@ -1,6 +1,5 @@
 from typing import Dict
 import logging
-import json
 
 from fastapi import APIRouter
 
@@ -36,25 +35,17 @@ class ComfortbotRequest(BaseModel):
     userRequest: Dict
 
 
-comfort_bot = ComfortBot()
-
-
 @router.post("/comfort")
 async def comfort(request: ComfortBotTestRequest):
-    answer = comfort_bot.reply(request.query)
+    answer = ComfortBot().reply(request.query)
     return {"A": answer}
 
 
 @router.post("/kakao")
 async def kakao(request: ComfortbotRequest):
     try:
-        requset_dict = request.userRequest
-
-        with open("./log_dict.json", "w", encoding="utf-8") as f:
-            json.dump(requset_dict, f, indent=4, ensure_ascii=False)
-
         query = request.userRequest["utterance"]
-        result = clova.reply(query)
+        result = ComfortBot().reply(query)
         return skillTemplate.send_response(result)
 
     except Exception as e:

@@ -43,7 +43,7 @@ class CompletionExecutor:
         request_data = {
             "text": preset_text,
             "maxTokens": 128,
-            "temperature": 0.2,
+            "temperature": 0.5,
             "topK": 0,
             "topP": 0.8,
             "repeatPenalty": 5.0,
